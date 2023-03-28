@@ -4,7 +4,7 @@
  * This script changes keyword bids so that they target specified positions,
  * based on recent performance.
  *
- * Version 2.0
+ * Version 2.1
  */
 
 // SCRIPT PARAMETERS SECTION START
@@ -33,6 +33,9 @@ const MAX_BID = 35.00;
 
 // Bids will not be decreased below this minimum.
 const MIN_BID = 5.15;
+
+// Should new bids be equal to or greater than Google first page CPC or top of page CPC (if absolute impression is used)
+const USE_GOOGLE_FIRST_PAGE_OR_TOP_OF_PAGE_CPC = false;
 // SCRIPT PARAMETERS SECTION END
 
 // Global variables for getting statistical data.
@@ -104,8 +107,9 @@ function lowerKeywordBids() {
 }
 
 /**
- * Increases a given CPC using the bid adjustment coefficient, but higher than first page CPC or
- * top of page CPC (if absolute impression is used).
+ * Increases a given CPC using the bid adjustment coefficient.
+ * If USE_GOOGLE_FIRST_PAGE_OR_TOP_OF_PAGE_CPC is true, then the new bid must be equal to or higher than the first page CPC
+ * or the top of page CPC (if absolute impression is used).
  * The final CPC must be within MIN_BID and MAX_BID range.
  * @param {number} cpc - the CPC to increase
  * @param {number} firstPageCpc - first page CPC
@@ -113,10 +117,12 @@ function lowerKeywordBids() {
  * @return {number} - the new CPC
  */
  function getIncreasedCpc(cpc, firstPageCpc, topOfPageCpc) {
-     const minCpc = USE_ABSOLUTE_TOP ? topOfPageCpc : firstPageCpc;
      let newCpc = cpc * BID_ADJUSTMENT_COEFFICIENT;
-     if (newCpc < minCpc) {
-         newCpc = minCpc;
+     if (USE_GOOGLE_FIRST_PAGE_OR_TOP_OF_PAGE_CPC) {
+         const minCpc = USE_ABSOLUTE_TOP ? topOfPageCpc : firstPageCpc;
+         if (newCpc < minCpc) {
+             newCpc = minCpc;
+         }
      }
      return limitCpc(newCpc);
 }
